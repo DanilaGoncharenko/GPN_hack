@@ -82,3 +82,9 @@ PYTHONPATH=src python3 -m pytest tests/ -q
 - Действие рекомендуется только когда квалификационный выигрыш по качеству
   или по надёжности превышает заданный порог (`config.QUALITY_MATERIAL_EPS`,
   `config.RELIABILITY_MATERIAL_EPS`) — иначе система намеренно бездействует.
+
+## Решение из GPN_hack (ветка isp-root)
+
+В этой ветке также подмержено решение из репозитория
+[DanilaGoncharenko/GPN_hack](https://github.com/DanilaGoncharenko/GPN_hack) —
+см. `decision.ipynb`.
