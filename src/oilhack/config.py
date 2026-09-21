@@ -37,6 +37,11 @@ class ControllableParam:
         return self.hi - self.lo
 
 
+# Список пересобран по `теги АВТ_24-2000.xlsx`: P8 оказался перепадом давления
+# на Р-202 (симптом закоксовывания, а не уставка), Q21 — поточным анализатором
+# серы, а квенч идёт по F14, а не по F15. Управляемым по 24-2000 оставлены
+# только те теги, которыми оператор действительно задаёт режим.
+#
 # Bounds below are the 5th/95th percentile of sentinel-cleaned history —
 # explicitly a *modelled experiment range*, not a validated industrial limit
 # (ТЗ: "не выдавайте исторический min/max за промышленный предел").
@@ -55,11 +60,11 @@ CONTROLLABLE_PARAMS: dict[str, ControllableParam] = {
         ControllableParam("F34", "avt", "Расход фр.150-250°С с установки", "т/ч", 56.0, 113.0),
         ControllableParam("T55", "avt", "Температура на выходе из печи П3", "°C", 375.8, 385.0),
         ControllableParam("F45", "avt", "Расход холодного гудрона в К10", "т/ч", 13.9, 20.1),
-        ControllableParam("W4", "242000", "Массовый расход бензина в колонну К-206", "т/ч", 0.7, 4.8),
-        ControllableParam("P8", "242000", "Температура ГСС на входе реактора Р-202", "°C", 0.09, 0.22),
+        ControllableParam("W4", "242000", "К-206: массовый расход бензина в колонну", "т/ч", 0.70, 4.76),
+        ControllableParam("T6", "242000", "Р-202: температура ГСС на входе (жёсткость гидроочистки)", "°C", 285.2, 380.2),
         ControllableParam("F9", "242000", "Расход сырья на установку (массовый)", "т/ч", 137.2, 252.7),
-        ControllableParam("F15", "242000", "Расход квенча в реактор Р-202", "нм3/ч", 2400.8, 3609.8),
-        ControllableParam("Q21", "242000", "Расход газа поддува на входе в К-201", "т/ч", 5.3, 11.7),
+        ControllableParam("F14", "242000", "Расход квенча в реактор Р-202", "т/ч", 2.97, 10.33),
+        ControllableParam("F22", "242000", "К-201: расход газа поддува (объёмный)", "нм³/ч", 3882.5, 16097.3),
     ]
 }
 
@@ -75,10 +80,13 @@ OPTIMIZER_STEPS_PER_SIDE = 2
 # own to touch a setpoint (avoids continuously trimming flows for a marginal,
 # unmodelled energy saving — real operators don't do that, and ТЗ explicitly
 # wants no unnecessary action in a stable period).
-QUALITY_MATERIAL_EPS = 1.1  # °C-scale improvement in the tracked cold-flow objective
-# (calibrated above the ~1.0-1.07°C ceiling a single lever's largest modelled
-# step can produce alone, so ordinary single-lever noise never qualifies —
-# only a genuinely larger/compound opportunity does)
+QUALITY_MATERIAL_EPS = 2.0  # °C-scale improvement in the tracked cold-flow objective
+# Калибровка: на спокойном тике максимум, который даёт один рычаг своим
+# наибольшим допустимым шагом, — 1.83 °C (T6), затем 0.39 (F22) и 0.10 (F30).
+# Порог поставлен выше этого потолка, чтобы обычное «подкручивание» одной
+# уставки не считалось значимым улучшением: действие предлагается только при
+# заметно большем выигрыше или по линии надёжности. Пересчитывать при любом
+# изменении формул ВАК или списка управляемых параметров.
 RELIABILITY_MATERIAL_EPS = 0.03  # severity-index improvement
 
 # Secondary Pareto tolerance once a candidate has passed the materiality gate

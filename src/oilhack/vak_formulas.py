@@ -5,11 +5,11 @@ latest known LIMS value) to lab quality metrics. Quality Agent uses them
 directly instead of training a new model — they are given ground truth for
 this prototype, not something we are free to re-fit.
 
-Two AVT formulas (`AVT6:350:T50` and `AVT6:350:D15`) share near-identical
-coefficients in the source spreadsheet despite different constants and
-different declared outputs. That is transcribed faithfully and flagged here
-as a known data oddity rather than "fixed" — Quality Agent's confidence
-estimate should treat AVT6:350:T50 as lower-trust for that reason.
+Источник истины — `формулы_ВАК.xlsx` от организаторов (9 формул ЭЛОУ-АВТ-6 и
+8 формул ЛЧ-24-2000), присланный отдельно от первого пакета. Первая версия
+справочника содержала ошибки (F30 вместо F65, слипшиеся коэффициенты
+AVT6:350:T50, F15 без деления на 2000 и др.); здесь всё сверено с примерами
+расчёта из этого файла — они закреплены тестами в `tests/test_vak_formulas.py`.
 """
 from __future__ import annotations
 
@@ -56,8 +56,8 @@ AVT_ANALYZERS: dict[str, VirtualAnalyzer] = {
     a.key: a
     for a in [
         VirtualAnalyzer(
-            "AVT6:240-350:D15", "avt", "кг/м3", ("F30", "F32", "T66", "T33"),
-            lambda r: 791.22872 - 5.30294 * _safe_div(r["F30"], r["F32"] + r["F30"])
+            "AVT6:240-350:D15", "avt", "кг/м3", ("F65", "F32", "F30", "T66", "T33"),
+            lambda r: 791.22872 - 5.30294 * _safe_div(r["F65"], r["F32"] + r["F30"])
             + 0.52755 * r["T66"] - 0.15629 * r["T33"],
         ),
         VirtualAnalyzer(
@@ -76,15 +76,14 @@ AVT_ANALYZERS: dict[str, VirtualAnalyzer] = {
             - 0.47309 * _safe_div(r["F65"], r["F32"] + r["F30"]),
         ),
         VirtualAnalyzer(
-            "AVT6:350:T50", "avt", "°C", ("T42", "F31", "F57", "T48"),
-            lambda r: 981.06539 + 0.27467 * r["T42"] - 0.32983 * _safe_div(r["F31"], r["F57"])
-            - 0.49014 * r["T48"],
-            note="Коэффициенты почти совпадают с AVT6:350:D15 в исходной таблице — "
-                 "оставлено как есть (данные организаторов), доверие снижено.",
+            "AVT6:350:T50", "avt", "°C", ("T42", "T48", "F31", "F57", "T66", "T33"),
+            lambda r: 493.6798 + 1.281193 * r["T42"] - 0.955342 * r["T48"]
+            - 0.018454 * r["F31"] + 0.265904 * r["F57"] - 0.082047 * r["T66"]
+            - 0.545083 * r["T33"],
         ),
         VirtualAnalyzer(
             "AVT6:350:I350", "avt", "% об.", ("L43", "T6", "T18", "F64", "T15", "T11"),
-            lambda r: 39.562 - 1.62865 * r["L43"] - 0.76664 * r["T6"] - 0.22361 * r["T18"]
+            lambda r: 39.562 - 1.62865 * r["L43"] + 0.76664 * r["T6"] - 0.22361 * r["T18"]
             + 0.00031 * r["F64"] * (r["T15"] - r["T11"]),
         ),
         VirtualAnalyzer(
@@ -112,12 +111,12 @@ U242000_ANALYZERS: dict[str, VirtualAnalyzer] = {
     for a in [
         VirtualAnalyzer(
             "24-2000:GODT:T90", "242000", "°C", ("T12", "F15", "W7", "T23", "F1", "F26"),
-            lambda r: 162.998 + 0.12945 * r["T12"] + 59.57 * r["F15"] + 0.00036 * r["W7"]
+            lambda r: 162.998 + 0.12945 * r["T12"] + 59.57 * (r["F15"] / 2000.0) + 0.00036 * r["W7"]
             + 0.26366 * r["T23"] - 424.72638 * _safe_div(r["F1"], r["F26"]),
         ),
         VirtualAnalyzer(
             "24-2000:GODT:T50", "242000", "°C", ("P13", "F9", "T6"),
-            lambda r: 44.625 + 10.0224 * r["P13"] + 0.06981 * r["F9"] + 0.8052 * r["T6"],
+            lambda r: 44.625 + 10.0224 * r["P13"] + 0.06981 * r["F9"] + 0.471 * r["T6"],
         ),
         VirtualAnalyzer(
             "24-2000:GODT:I250", "242000", "% об.", ("T5", "T11", "F25", "F14", "T23", "T16"),
@@ -134,20 +133,20 @@ U242000_ANALYZERS: dict[str, VirtualAnalyzer] = {
         ),
         VirtualAnalyzer(
             "24-2000:GODT:CloudPoint", "242000", "°C", ("W7", "F25", "F1", "T6", "F9", "T16", "F22"),
-            lambda r: r["F22"] + 0.0021 * r["W7"] + 0.00008 * r["F25"] - 0.30656 * r["F1"]
+            lambda r: 0.0002 * r["F22"] + 0.0021 * r["W7"] + 0.00008 * r["F25"] - 0.30656 * r["F1"]
             + 0.12018 * r["T6"] + 0.01916 * r["F9"] - 48.254 - 0.05249 * r["T16"] + 0.00011,
         ),
         VirtualAnalyzer(
             "24-2000:GODT:T95", "242000", "°C", ("F9", "F2", "T6"),
-            lambda r: 0.03814 * r["F9"] - 9.201 - 0.00002 * r["F2"] + 0.62259 * r["T6"]
+            lambda r: 0.03814 * r["F9"] - 9.201 - 0.00002 * r["F2"] + 0.50 * r["T6"]
             + 0.48321 * r["LIMS:24-2000.Pipeline.95%.T"],
             lims_inputs=("LIMS:24-2000.Pipeline.95%.T",),
             note="Требует последнего известного значения ЛИМС 95%.T по тому же "
                  "продукту (допущение маппинга).",
         ),
         VirtualAnalyzer(
-            "24-2000:GODT:CFPP", "242000", "°C", ("T6", "P8", "F9", "W7", "P24"),
-            lambda r: 0.22088 * r["T6"] - 102.375 - 47.75834 * r["P8"] + 0.03862 * r["F9"]
+            "24-2000:GODT:CFPP", "242000", "°C", ("T23", "P8", "F9", "W7", "P24"),
+            lambda r: 0.22088 * r["T23"] - 102.375 - 47.75834 * r["P8"] + 0.03862 * r["F9"]
             + 43.60207 * r["W7"] + 43.81849 * r["P24"],
         ),
         VirtualAnalyzer(

@@ -36,7 +36,7 @@ from . import reliability_agent
 
 COLD_FLOW_METRICS = ("AVT6:240-350:CFPP", "AVT6:350:CFPP", "24-2000:GODT:CFPP",
                       "24-2000:GODT:CloudPoint")
-ENERGY_TAGS = {"F5", "F26", "F27", "F28", "F29", "F45", "T55", "F15", "Q21"}
+ENERGY_TAGS = {"F5", "F26", "F27", "F28", "F29", "F45", "T55", "T6", "F14", "F22"}
 THROUGHPUT_TAGS = {"F9", "F30", "F32", "F34", "W4"}
 
 _ANALYZERS_BY_DATASET = {"avt": AVT_ANALYZERS, "242000": U242000_ANALYZERS}

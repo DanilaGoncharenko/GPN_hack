@@ -106,9 +106,6 @@ def assess(
     elif "устарело" in sulfur_source:
         confidence -= 0.3
         reasons.append(f"Последнее измерение серы устарело ({sulfur_age:.1f} ч)")
-    if "AVT6:350:T50" in predictions:
-        confidence -= 0.05
-        reasons.append("AVT6:350:T50 имеет дублирующиеся коэффициенты с D15 в источнике — понижена уверенность")
     confidence = max(0.0, min(1.0, confidence))
 
     return QualityForecast(

@@ -21,9 +21,9 @@ def test_score_only_flags_throughput_or_energy_for_the_relevant_tag_set():
     assert throughput == 0.2  # F9 is a throughput tag
     assert energy == 0.0
 
-    _, throughput2, energy2 = _score({}, {}, "F15", delta_value=2.0, param_range=10.0)
+    _, throughput2, energy2 = _score({}, {}, "F14", delta_value=2.0, param_range=10.0)
     assert throughput2 == 0.0
-    assert energy2 == 0.2  # F15 is an energy tag
+    assert energy2 == 0.2  # F14 (квенч) is an energy tag
 
 
 def test_dominates_requires_beating_the_epsilon_margin():
