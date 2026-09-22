@@ -1,6 +1,4 @@
-"""Typed messages passed between agents — the explicit inter-agent protocol
-(ТЗ: "взаимодействие между ролями должно быть явно показано в коде").
-"""
+"""Typed messages passed between agents — explicit inter-agent protocol."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -27,26 +25,26 @@ class QualityForecast:
     predictions: dict[str, float]
     lims_inputs_used: dict[str, float]
     sulfur_ppm: float | None
-    sulfur_source: str  # "PAK" | "LIMS" | "unavailable"
+    sulfur_source: str
     sulfur_age_hours: float | None
     spec_risk: bool
-    confidence: float  # 0..1
+    confidence: float
     confidence_reasons: list[str] = field(default_factory=list)
 
 
 @dataclass
 class ReliabilityAssessment:
     timestamp: pd.Timestamp
-    severity_index: float  # 0..1, proxy metric
-    severity_class: str  # "normal" | "warn" | "critical"
+    severity_index: float
+    severity_class: str
     risk_factors: list[str]
-    allowed_delta_scale: float  # 1.0 normal, shrinks as severity rises
+    allowed_delta_scale: float
 
 
 @dataclass
 class ScenarioCandidate:
     label: str
-    deltas: dict[str, float]  # tag -> absolute new value
+    deltas: dict[str, float]
     predicted_sulfur_ppm: float | None
     predicted_quality: dict[str, float]
     reliability_severity: float
@@ -54,12 +52,14 @@ class ScenarioCandidate:
     energy_proxy: float
     feasible: bool
     violations: list[str] = field(default_factory=list)
+    # Консервативная верхняя граница прогноза используется только как hard gate.
+    predicted_sulfur_upper_ppm: float | None = None
 
 
 @dataclass
 class OptimizationResult:
     timestamp: pd.Timestamp
-    candidates: list[ScenarioCandidate]  # feasible, pareto-sorted, best first
+    candidates: list[ScenarioCandidate]
     infeasible_count: int
     baseline: ScenarioCandidate
 
@@ -67,7 +67,7 @@ class OptimizationResult:
 @dataclass
 class ImpactRecord:
     applied_at: pd.Timestamp
-    decision: str  # "confirmed" | "rejected" | "alternative_requested"
+    decision: str
     deltas: dict[str, float]
     predicted_reliability_severity: float | None
     predicted_sulfur_ppm: float | None
@@ -77,7 +77,7 @@ class ImpactRecord:
 @dataclass
 class Recommendation:
     timestamp: pd.Timestamp
-    status: str  # "no_action" | "action" | "no_feasible_solution" | "insufficient_data"
+    status: str
     state_summary: str
     problem: str
     action: str
@@ -90,16 +90,18 @@ class Recommendation:
     alternatives: list[ScenarioCandidate] = field(default_factory=list)
     sulfur_ppm: float | None = None
     reliability_severity: float | None = None
+    predicted_sulfur_upper_ppm: float | None = None
 
 
 @dataclass
 class CycleResult:
-    """Everything one orchestrator cycle produced — bundled so the dashboard
-    can inspect each agent's own output, not just the final recommendation.
-    """
+    """Все выходы одного цикла: dashboard видит каждый агент отдельно."""
     timestamp: pd.Timestamp
     data_report: DataQualityReport
     quality: QualityForecast | None
     reliability: ReliabilityAssessment | None
     optimization: OptimizationResult | None
     recommendation: Recommendation
+    sulfur_forecast: object | None = None
+    constraint_report: object | None = None
+    blending: object | None = None

@@ -116,3 +116,20 @@ RELIABILITY_CRITICAL_THRESHOLD = 0.85
 MIN_TAG_COVERAGE = 0.8
 
 DASHBOARD_TICK_MINUTES = 10
+
+# ---------------------------------------------------------------------------
+# Контрфактический прогноз серы
+# ---------------------------------------------------------------------------
+# Surrogate обучается только на истории до текущего cutoff, чтобы не было
+# временной утечки. 180 дней — экспериментальное окно, а не технологический
+# норматив. Обучение берёт каждый третий 10-минутный тик (30 минут).
+FORECAST_TRAINING_DAYS = 120
+FORECAST_DOWNSAMPLE_STEPS = 6
+FORECAST_MIN_SAMPLES = 1200
+FORECAST_LAGS = (0, 1, 3, 6, 12)
+FORECAST_HORIZONS_STEPS = (3, 6, 12)
+# Conservative model guard for delta sulfur used in counterfactual demos.
+# It is an experimental bound, not an industrial process limit.
+FORECAST_MAX_ABS_DELTA_PPM = 1.5
+SULFUR_MATERIAL_EPS = 0.5  # мг/кг, экспериментальный порог значимого улучшения
+SULFUR_SCORE_WEIGHT = 2.0  # перевод выигрыша по сере в multi-objective score
