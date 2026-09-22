@@ -37,13 +37,13 @@ st.set_page_config(
 CSS = """
 <style>
 :root{
-  --bg:#0d1117; --panel:#161b22; --line:#2a313c;
-  --text:#e6edf3; --muted:#9aa4b2;
-  --ok:#2ea043; --warn:#d29922; --bad:#f85149; --info:#4c8dff;
+  --bg:#FFFFFF; --panel:#F4F7FA; --line:#D8E0E8;
+  --text:#1F2A37; --muted:#64748B;
+  --ok:#1A7F4B; --warn:#B58500; --bad:#C62828; --info:#005EA6;
 }
 .stApp{background:var(--bg); color:var(--text);}
 header[data-testid="stHeader"]{background:transparent;}
-section[data-testid="stSidebar"]{background:#11161d; border-right:1px solid var(--line);}
+section[data-testid="stSidebar"]{background:#F0F4F8; border-right:1px solid var(--line);}
 .block-container{padding-top:1.6rem; max-width:1500px;}
 h1,h2,h3,h4{letter-spacing:-.4px; color:var(--text)!important;}
 [data-testid="stMarkdownContainer"] p,[data-testid="stMarkdownContainer"] li{color:var(--text);}
@@ -60,13 +60,13 @@ h1,h2,h3,h4{letter-spacing:-.4px; color:var(--text)!important;}
   padding:12px 14px; height:100%;}
 .step .n{color:var(--muted); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase;}
 .step .name{font-weight:700; margin:.15rem 0 .35rem; font-size:1.02rem;}
-.step .val{font-size:.94rem; color:var(--text);}
+.step .val{font-size:.94rem;}
 .step .note{color:var(--muted); font-size:.82rem; margin-top:.3rem;}
 .step.ok{border-left:4px solid var(--ok);}
 .step.warn{border-left:4px solid var(--warn);}
 .step.bad{border-left:4px solid var(--bad);}
 .step.info{border-left:4px solid var(--info);}
-.step.off{border-left:4px solid #3a414c; opacity:.55;}
+.step.off{border-left:4px solid #C3CCD6; opacity:.55;}
 
 .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px 20px;}
 .row{display:flex; gap:14px; padding:10px 0; border-bottom:1px solid var(--line);}
@@ -75,7 +75,7 @@ h1,h2,h3,h4{letter-spacing:-.4px; color:var(--text)!important;}
 .row .v{font-size:1rem;}
 .big{font-size:1.15rem; font-weight:700;}
 
-.gauge{height:10px; border-radius:6px; background:#22272e; overflow:hidden; margin:.45rem 0 .2rem;}
+.gauge{height:10px; border-radius:6px; background:#E6ECF2; overflow:hidden; margin:.45rem 0 .2rem;}
 .gauge > span{display:block; height:100%;}
 </style>
 """
@@ -203,18 +203,18 @@ def recommendation_card(rec) -> None:
 def timeline(series: pd.DataFrame, current_ts=None) -> go.Figure:
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=series["timestamp"], y=series["sulfur"], name="Сера, мг/кг",
-                              mode="lines+markers", line=dict(color="#e3a008", width=2)))
-    fig.add_hline(y=SULFUR_LIMIT_MG_KG, line=dict(color="#f85149", dash="dash"),
+                              mode="lines+markers", line=dict(color="#005EA6", width=2)))
+    fig.add_hline(y=SULFUR_LIMIT_MG_KG, line=dict(color="#E30613", dash="dash"),
                   annotation_text="предел 10 мг/кг", annotation_position="top left")
     fig.add_trace(go.Scatter(x=series["timestamp"], y=series["severity"], name="Тяжесть режима",
-                              mode="lines+markers", line=dict(color="#4c8dff", width=2), yaxis="y2"))
+                              mode="lines+markers", line=dict(color="#64748B", width=2), yaxis="y2"))
     if current_ts is not None:
-        fig.add_vline(x=current_ts, line=dict(color="#9aa4b2", dash="dot"))
+        fig.add_vline(x=current_ts, line=dict(color="#9AA4B2", dash="dot"))
     fig.update_layout(
         height=330, margin=dict(l=8, r=8, t=28, b=8),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#e6edf3"),
-        yaxis=dict(title="Сера, мг/кг", gridcolor="#222932"),
+        font=dict(color="#1F2A37"),
+        yaxis=dict(title="Сера, мг/кг", gridcolor="#E4EAF1"),
         yaxis2=dict(title="Тяжесть", overlaying="y", side="right", range=[0, 1], showgrid=False),
         legend=dict(orientation="h", yanchor="bottom", y=1.02),
     )
